@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "github.com/AndroSaal/simplebank/proto/gateway-auth/v1";
+
+service Auth {
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc Loginer (LoginerRequest) returns (LoginerResponse);
+    rpc IsAdmin (IsAdminRequest) returns (IsAdminResponse);
+}
+
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message RegisterResponse {
+    int64 userId = 1;
+}
+
+message LoginerRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginerResponse {
+    string token = 1;
+}
+
+message IsAdminRequest {
+    int64 userId = 1;
+}
+
+message IsAdminResponse {
+    bool isAdmin = 1;
+}
+
+
+
