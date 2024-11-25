@@ -1,0 +1,7 @@
+env: "local" 
+
+#storage_path
+
+grpc:
+  port: 44044
+  timeout: 10h
