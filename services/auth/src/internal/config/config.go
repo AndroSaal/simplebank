@@ -20,7 +20,7 @@ type ServerConfig struct {
 
 // конфигурация grpc сервера
 type GRPCConfing struct {
-	Port    string        `yaml:"port"`
+	Port    int           `yaml:"port"`
 	Host    string        `yaml:"host"`
 	Timeout time.Duration `yaml:"timeout"`
 }

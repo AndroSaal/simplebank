@@ -1,16 +1,22 @@
 package main
 
 import (
-	"fmt"
+	"log/slog"
 
-	"github.com/AndtoSaal/simplebank/services/auth/src/internal/config"
+	config "github.com/AndtoSaal/simplebank/services/auth/src/internal/config"
+	log "github.com/AndtoSaal/simplebank/services/auth/src/internal/logger"
 )
 
 func main() {
-	cfgServer := config.MustLoadServerConfig()
-	fmt.Println(cfgServer)
 
-	//TODO: логгер
+	cfgServer := config.MustLoadServerConfig()
+
+	logger := log.SetUpSlogLogger(cfgServer.Env)
+
+	logger.Info("starting aplication",
+		slog.String("env", cfgServer.Env),
+		slog.Int("port", cfgServer.GRPC.Port),
+	)
 
 	//TODO: инициализация сервиса
 
