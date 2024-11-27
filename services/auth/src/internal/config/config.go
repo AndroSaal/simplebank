@@ -1,8 +1,10 @@
 package config
 
+import "google.golang.org/grpc"
+
 type ServerConfig struct {
-	Env string `yaml:"env" env-default:"local"`
-	GRPC
+	Env  string `yaml:"env" env-default:"local"`
+	GRPC grpc.Server
 }
 
 type DatabaseConfig struct {
