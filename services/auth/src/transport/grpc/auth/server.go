@@ -1,4 +1,6 @@
-package auth
+//Транспортный слой
+
+package authAPI
 
 import (
 	"context"
@@ -16,17 +18,17 @@ func RegisterAuthServer(gRPC *grpc.Server) {
 	grpcAuthV1.RegisterAuthServer(gRPC, &serverAPI{})
 }
 
-func (s *serverAPI) Login(ctx context.Context, req *grpcAuthV1.LoginerRequest) (*grpcAuthV1.LoginerResponse, error) {
+func (s *serverAPI) Loginer(context.Context, *grpcAuthV1.LoginerRequest) (*grpcAuthV1.LoginerResponse, error) {
 	// log.LevelDebug("UNimplemented")
 	panic("U got wat u want\n")
 }
 
-func (s *serverAPI) Register(ctx context.Context, req *grpcAuthV1.RegisterRequest) (*grpcAuthV1.RegisterResponse, error) {
+func (s *serverAPI) Register(context.Context, *grpcAuthV1.RegisterRequest) (*grpcAuthV1.RegisterResponse, error) {
 	// log.LevelDebug("UNimplemented")
 	panic("U got wat u want\n")
 }
 
-func (s *serverAPI) IsAdmin(ctx context.Context, req *grpcAuthV1.IsAdminRequest) (*grpcAuthV1.IsAdminResponse, error) {
+func (s *serverAPI) IsAdmin(context.Context, *grpcAuthV1.IsAdminRequest) (*grpcAuthV1.IsAdminResponse, error) {
 	// log.LevelDebug("UNimplemented")
 	panic("U got wat u want\n")
 }
