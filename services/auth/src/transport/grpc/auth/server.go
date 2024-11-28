@@ -68,7 +68,7 @@ func (s *authServerAPI) Register(ctx context.Context, req *grpcAuthV1.RegisterRe
 
 	uid, err := s.auth.RegisterNewUser(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
-		//repository.ErrUserExists мы создадим ниже
+		//repository.ErrUserExists реализовать
 		if errors.Is(err, repository.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
 		}
