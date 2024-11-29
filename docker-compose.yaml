@@ -1,0 +1,21 @@
+# version: "3.9"
+services:
+  postgres_auth:
+    image: postgres:14.8-alpine3.18
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "qwerty"
+    # env_file: -- сделать обязательно
+    #   - ./services/gateway/.env
+    volumes:
+      - ./services/auth/migrations/000001_init.down.sql:/docker-entrypoint-initdb.d/
+    ports:
+      - "5436:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: always
