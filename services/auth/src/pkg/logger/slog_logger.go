@@ -30,10 +30,10 @@ func SetUpSlogLogger(env string) *slog.Logger {
 	return logger
 }
 
-//функция для обработки ошибок
+// функция для обработки ошибок
 func Err(err error) slog.Attr {
-    return slog.Attr{
-        Key:   "error",
-        Value: slog.StringValue(err.Error()),
-    }
+	return slog.Attr{
+		Key:   "error",
+		Value: slog.StringValue(err.Error()),
+	}
 }
