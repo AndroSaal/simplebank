@@ -1,8 +1,8 @@
 package main
 
 import (
-	config "github.com/AndtoSaal/simplebank/services/auth/src/internal/config"
-	log "github.com/AndtoSaal/simplebank/services/auth/src/internal/logger"
+	config "github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
+	log "github.com/AndtoSaal/simplebank/services/auth/src/pkg/logger"
 )
 
 func main() {
@@ -11,10 +11,18 @@ func main() {
 
 	logger := log.SetUpSlogLogger(cfgServer.Env)
 
-	//TODO: запуск сервиса
+	//TODO: инициализировать слой репозитория
+
+	//TODO: инициализировать слой сервиса
+
+	//TODO: инициализировать слой хэндлеров
+
+	//TODO: инициализация сервера
+
+	//TODO: Запуск сервера
 
 	//TODO: обработка сигналов
 
-	//TODO: остановка сервиса
+	//TODO: остановка сервиса (graicfull shoutdown)
 
 }
