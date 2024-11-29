@@ -7,7 +7,7 @@ import (
 	"errors"
 
 	grpcAuthV1 "github.com/AndtoSaal/simplebank/services/auth/pb/gateway-auth/v1"
-	auth_service "github.com/AndtoSaal/simplebank/services/auth/src/service"
+	auth_service "github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service/errors"
 
 	// "google.golang.org/appengine/log"
 
@@ -31,18 +31,18 @@ type Auth interface {
 	RegisterNewUser(ctx context.Context, email string, password string) (userID int64, err error)
 }
 
-// cjplfybt
-func RegisterAuthServer(gRPC *grpc.Server) {
+// создание нового сервера авторизации
+func NewAuthServer(gRPC *grpc.Server) {
 	grpcAuthV1.RegisterAuthServer(gRPC, &authServerAPI{})
 }
 
 func (s *authServerAPI) Loginer(ctx context.Context, req *grpcAuthV1.LoginerRequest) (*grpcAuthV1.LoginerResponse, error) {
 	if req.Email == "" {
-		return nil, gRPCstatus.Error(codes.InvalidArgument, "email is required pole")
+		return nil, gRPCstatus.Error(codes.InvalidArgument, "email is required field")
 	}
 
 	if req.Password == "" {
-		return nil, gRPCstatus.Error(codes.InvalidArgument, "password is required pole")
+		return nil, gRPCstatus.Error(codes.InvalidArgument, "password is required field")
 	}
 
 	token, err := s.auth.LoginExistUser(ctx, req.GetEmail(), req.GetPassword())
@@ -59,17 +59,17 @@ func (s *authServerAPI) Loginer(ctx context.Context, req *grpcAuthV1.LoginerRequ
 
 func (s *authServerAPI) Register(ctx context.Context, req *grpcAuthV1.RegisterRequest) (*grpcAuthV1.RegisterResponse, error) {
 	if req.Email == "" {
-		return nil, status.Error(codes.InvalidArgument, "email is required")
+		return nil, status.Error(codes.InvalidArgument, "email is required field")
 	}
 
 	if req.Password == "" {
-		return nil, status.Error(codes.InvalidArgument, "password is required")
+		return nil, status.Error(codes.InvalidArgument, "password is required field")
 	}
 
 	uid, err := s.auth.RegisterNewUser(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
-		//repository.ErrUserExists реализовать
-		if errors.Is(err, repository.ErrUserExists) {
+		//repository.ErrUserExists реализовать на сервисном слое
+		if errors.Is(err, auth_service.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
 		}
 
