@@ -2,12 +2,17 @@ package auth_service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/AndtoSaal/simplebank/services/auth/src/entities/models"
+	jwtAuth "github.com/AndtoSaal/simplebank/services/auth/src/pkg/jwt"
 	log "github.com/AndtoSaal/simplebank/services/auth/src/pkg/logger"
+	"github.com/AndtoSaal/simplebank/services/auth/src/repository"
+	auth_service "github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service/errors"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserAdder interface {
@@ -46,10 +51,10 @@ func NewAuthService(
 	}
 }
 
-// метод для реализации интерфейса из транспортного слоя
+// метод для реализации интерфейса из транспортного слоя - регистрация нового полььзователя
 func (as *AuthService) RegisterNewUser(
 	ctx context.Context,
-	email string, passwordHash []byte) (userId int, err error) {
+	email string, password string) (userId int, err error) {
 
 	const tracelog = "auth_service.RegisterNewUser"
 
@@ -61,6 +66,8 @@ func (as *AuthService) RegisterNewUser(
 	logLocal.Info("Register new user")
 	//добавить пароля с помощью паkета crypto
 
+	//генерируем хэш и соль для пароля
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		logLocal.Error("failed to generate password hash", log.Err(err))
 
@@ -74,5 +81,50 @@ func (as *AuthService) RegisterNewUser(
 	}
 
 	return userId, nil
+
+}
+
+func (as *AuthService) LoginExistUser(ctx context.Context, email string, password string) (token string, err error) {
+
+	const tracelog = "auth_service.LoginExistUser"
+
+	logLocal := as.log.With(
+		slog.String("tracelog", tracelog),
+		slog.String("email", email),
+		//пароль нужно засекретить, если проект станет чуть рентабильнее
+		slog.String("password", password),
+	)
+
+	logLocal.Info("Login exist user")
+
+	//Получение пользователя из базы
+	user, err := as.userRepositoryHandler.GetUser(ctx, email)
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			as.log.Warn("user not found", log.Err(err))
+			return "", fmt.Errorf("%s: %w", tracelog, auth_service.ErrInvalidCredentials)
+		}
+
+		as.log.Error("failed to get user", log.Err(err))
+		return "", fmt.Errorf("%s: %w", tracelog, err)
+	}
+
+	//Проверка пароля для найденного пользователя
+	if err := bcrypt.CompareHashAndPassword(user.PasswordHash, []byte(password)); err != nil {
+		as.log.Info("invalid credentials", log.Err(err))
+
+		return "", fmt.Errorf("%s: %w", tracelog, auth_service.ErrInvalidCredentials)
+	}
+
+	logLocal.Info("user logged in successfully")
+
+	//создание токена для пользователя
+	token, err = jwtAuth.NewToken(*user, as.tokenTTL)
+	if err != nil {
+		as.log.Error("failed to create token", log.Err(err))
+		return "", fmt.Errorf("%s: %w", tracelog, err)
+	}
+
+	return token, nil
 
 }
