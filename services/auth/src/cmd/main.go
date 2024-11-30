@@ -1,15 +1,21 @@
 package main
 
 import (
+	"fmt"
+
 	config "github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
 	log "github.com/AndtoSaal/simplebank/services/auth/src/pkg/logger"
 )
 
 func main() {
 
-	cfgServer := config.MustLoadServerConfig()
+	///инициализация конфигов сервера и дб
+	cfgServer, cfgDataBase := config.MustLoadConfig()
 
+	//инициализируем логгер с соотв переменной окружения
 	logger := log.SetUpSlogLogger(cfgServer.Env)
+	logger.Debug("проверка логгера")
+	fmt.Println(cfgDataBase, cfgServer)
 
 	//TODO: инициализировать слой репозитория
 

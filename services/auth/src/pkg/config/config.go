@@ -20,23 +20,24 @@ type ServerConfig struct {
 
 // конфигурация grpc сервера
 type GRPCConfing struct {
-	Port    string        `yaml:"port"`
-	Host    string        `yaml:"host"`
-	Timeout time.Duration `yaml:"timeout"`
+	Port    string        `yaml:"grpc:port" env-default:"50051"`
+	Host    string        `yaml:"grpc:host"`
+	Timeout time.Duration `yaml:"grpc:timeout"`
 }
 
 // конфигурация базы
 type DatabaseConfig struct {
-	Env      string `yaml:"env"`
-	Host     string `yaml:"host" env-default:"localhost"`
-	Port     string `yaml:"port" env-default:"5432"`
-	UserName string `yaml:"username" env-default:"postgres"`
-	Password string `yaml:"password" env-default:"postgres"`
-	Database string `yaml:"dbname" env-default:"postgres"`
+	Env      string `yaml:"db:env"`
+	Host     string `yaml:"db:host" env-default:"localhost"`
+	Port     string `yaml:"db:port" env-default:"5432"`
+	UserName string `yaml:"db:username" env-default:"postgres"`
+	Password string `yaml:"db:password" env-default:"qwerty"`
+	Database string `yaml:"db:dbname" env-default:"postgres"`
 }
 
-func MustLoadServerConfig() *ServerConfig { //должна быть паника вместо обработки ошибки
+func MustLoadConfig() (*ServerConfig, *DatabaseConfig) {
 	path := getConfigPath()
+
 	if path == "" {
 		panic("empty Server Config path")
 	}
@@ -46,7 +47,29 @@ func MustLoadServerConfig() *ServerConfig { //должна быть паника
 		panic("config file does not exist: " + path)
 	}
 
+	serverConfig := MustLoadServerConfig(path)
+	dbConfig := MustLoadDataBaseConfig(path)
+
+	return serverConfig, dbConfig
+
+}
+
+func MustLoadServerConfig(path string) *ServerConfig { //должна быть паника вместо обработки ошибки
 	var cfg ServerConfig
+
+	//запись из файла по пути path в сущность cfg,
+	//если возникает ошибка - паникуем
+
+	if err := cleanenv.ReadConfig(path, &cfg); err != nil {
+		panic("config path is empty: " + err.Error())
+	}
+
+	return &cfg
+
+}
+
+func MustLoadDataBaseConfig(path string) *DatabaseConfig {
+	var cfg DatabaseConfig
 
 	//запись из файла по пути path в сущность cfg,
 	//если возникает ошибка - паникуем
@@ -55,7 +78,6 @@ func MustLoadServerConfig() *ServerConfig { //должна быть паника
 	}
 
 	return &cfg
-
 }
 
 // получение пути до файла возможно как через перменную окружения,
