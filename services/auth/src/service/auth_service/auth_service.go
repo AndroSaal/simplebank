@@ -10,7 +10,7 @@ import (
 	"github.com/AndtoSaal/simplebank/services/auth/src/entities/models"
 	jwtAuth "github.com/AndtoSaal/simplebank/services/auth/src/pkg/jwt"
 	log "github.com/AndtoSaal/simplebank/services/auth/src/pkg/logger"
-	"github.com/AndtoSaal/simplebank/services/auth/src/repository"
+	auth_repository "github.com/AndtoSaal/simplebank/services/auth/src/repository"
 	auth_service "github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service/errors"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -20,7 +20,7 @@ type UserAdder interface {
 }
 
 type UserGetter interface {
-	GetUser(ctx context.Context, email string) (*models.User, error)
+	GetUser(ctx context.Context, email string) (models.User, error)
 }
 
 // интерфейс для хранилища (repository слой)
@@ -100,7 +100,7 @@ func (as *AuthService) LoginExistUser(ctx context.Context, email string, passwor
 	//Получение пользователя из базы
 	user, err := as.userRepositoryHandler.GetUser(ctx, email)
 	if err != nil {
-		if errors.Is(err, repository.ErrUserNotFound) {
+		if errors.Is(err, auth_repository.ErrUserNotFound) {
 			as.log.Warn("user not found", log.Err(err))
 			return "", fmt.Errorf("%s: %w", tracelog, auth_service.ErrInvalidCredentials)
 		}
@@ -119,7 +119,7 @@ func (as *AuthService) LoginExistUser(ctx context.Context, email string, passwor
 	logLocal.Info("user logged in successfully")
 
 	//создание токена для пользователя
-	token, err = jwtAuth.NewToken(*user, as.tokenTTL)
+	token, err = jwtAuth.NewToken(user, as.tokenTTL)
 	if err != nil {
 		as.log.Error("failed to create token", log.Err(err))
 		return "", fmt.Errorf("%s: %w", tracelog, err)

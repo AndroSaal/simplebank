@@ -1,12 +1,17 @@
-package repository
+package auth_repository
 
-import "context"
+import (
+	"context"
+
+	"github.com/AndtoSaal/simplebank/services/auth/src/entities/models"
+	"github.com/jmoiron/sqlx"
+)
 
 // интерфейс, которым определяющий тип, которым должна обладать конкретная бд
 // чтобы его реализовывать
 type Repository interface {
 	SaveUser(ctx context.Context, email string, password_Hash []byte) (userId int, err error)
-	GetUser(ctx context.Context, email string) (userId int, err error)
+	GetUser(ctx context.Context, email string) (models.User, error)
 }
 
 // тип, релизующий интерфейс сервисвного слоя UserRepository
@@ -15,6 +20,6 @@ type AuthUserRepo struct {
 }
 
 // конструктор типа AuthUserRepo
-func NewAuthUserHandler(repo Repository) *AuthUserRepo {
-	return &AuthUserRepo{repo: repo}
+func NewAuthRepository(db *sqlx.DB) *AuthUserRepo {
+	return &AuthUserRepo{repo: NewAuthPostgresRepo(db)}
 }

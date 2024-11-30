@@ -1,4 +1,4 @@
-package repository
+package auth_repository
 
 import (
 	"context"
@@ -31,14 +31,14 @@ func (p *AuthPostgresDB) SaveUser(
 }
 
 // TODO : Добавить ошибки
-func (r *AuthPostgresDB) GetUser(username, password string) (models.User, error) {
+func (r *AuthPostgresDB) GetUser(ctx context.Context, email string) (models.User, error) {
 
 	var (
 		user models.User
 	)
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE username=$1 AND password_hash=$2", usersTable)
-	err := r.db.Get(&user, query, username /*$1 в query*/, password /*$2 в query*/)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE username=$1", usersTable)
+	err := r.db.Get(&user, query, email /*$1 в query*/)
 
 	return user, err
 }

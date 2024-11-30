@@ -33,6 +33,7 @@ type DatabaseConfig struct {
 	UserName string `yaml:"db:username" env-default:"postgres"`
 	Password string `yaml:"db:password" env-default:"qwerty"`
 	Database string `yaml:"db:dbname" env-default:"postgres"`
+	SSLMode  string `yaml:"db:sslmode" env-default:"disable"`
 }
 
 func MustLoadConfig() (*ServerConfig, *DatabaseConfig) {
