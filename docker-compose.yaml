@@ -2,6 +2,7 @@
 services:
   postgres_auth:
     image: postgres:14.8-alpine3.18
+    container_name: postgres_auth
     environment:
       POSTGRES_DB: "postgres"
       POSTGRES_USER: "postgres"
