@@ -11,11 +11,13 @@ CONFIGPATH=./configs/local.yml
 MIGRATIONSDIR=migrations
 
 build :
-	go build -o ./.bin/auth ./src/cmd/main.go --config=$(CONFIGPATH)
+	go build -o ./.bin/auth ./src/cmd/main.go
 
-run :
-	./.bin/auth
+run : build
+	./.bin/auth  --config=$(CONFIGPATH)
 # 	 go run src/cmd/main.go --config=$(CONFIGPATH)
+clean :
+	rm -rf ./.bin
 
 create_migration_files :
 	mkdir -p $(MIGRATIONSDIR)
@@ -30,4 +32,5 @@ migr_up:
 migr_down: migr_up
 	migrate -path $(PATH_TO_SCHEMA) -database "$(DB_DRIVE)://$(DB_USER):$(DB_PASS)@$(DB_IP):$(DB_PORT)/$(DB_NAME)?$(DB_OPT)" -verbose up
 
+.DEFAULT_GOAL := run
 .PHONY  : migr_down, migr_up, create_migration_files, run

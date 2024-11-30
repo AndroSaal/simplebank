@@ -11,4 +11,4 @@ RUN apk add --no-cache make \
  && go install github.com/githubnemo/CompileDaemon
 
 # Пересобирать контейнер каждый раз, когда изменяется исходный код!
-ENTRYPOINT CompileDaemon -build="go build -o ./.bin/auth ./cmd/main.go" -command="./.bin/auth"
+ENTRYPOINT CompileDaemon -build="make build" -command="make"
