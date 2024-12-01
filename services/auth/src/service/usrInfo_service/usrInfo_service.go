@@ -1,41 +1,38 @@
 package usrInfo_service
 
-import "log/slog"
+import (
+	"context"
+	"log/slog"
+)
 
-type userInfoService struct {
+type UserInfoService struct {
 	log                   *slog.Logger
 	userRepositoryHandler UserINFORepository
 }
 
 type UserINFORepository interface {
-	GetUserInfo(id int) (bool, error)
+	GetUserInfo(id int64) (bool, error)
 }
 
 type UserInfo struct {
-	Id      int
+	Id      int64
 	IsAdmin bool
 }
 
-func NewUserInfoService(log *slog.Logger, userRepositoryHandler UserINFORepository) *userInfoService {
-	return &userInfoService{
+func NewUserInfoService(log *slog.Logger, userRepositoryHandler UserINFORepository) *UserInfoService {
+	return &UserInfoService{
 		log:                   log,
 		userRepositoryHandler: userRepositoryHandler,
 	}
 }
 
-func (u *userInfoService) GetUserInfo(id int) (UserInfo, error) {
-	isAdmin, err := u.userRepositoryHandler.GetUserInfo(id)
+func (u *UserInfoService) IsAdminById(ctx context.Context, userId int64) (bool, error) {
+	isAdmin, err := u.userRepositoryHandler.GetUserInfo(userId)
 
 	if err != nil {
 		u.log.Error("Error while getting user info", "error", err)
-		return UserInfo{
-			Id:      -1,
-			IsAdmin: false,
-		}, err
+		return false, err
 	}
 
-	return UserInfo{
-		Id:      id,
-		IsAdmin: isAdmin,
-	}, nil
+	return isAdmin, nil
 }

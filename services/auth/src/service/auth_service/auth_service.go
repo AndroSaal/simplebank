@@ -16,7 +16,7 @@ import (
 )
 
 type UserAdder interface {
-	SaveUser(ctx context.Context, email string, password_Hash []byte) (userId int, err error)
+	SaveUser(ctx context.Context, email string, password_Hash []byte) (userId int64, err error)
 }
 
 type UserGetter interface {
@@ -54,7 +54,7 @@ func NewAuthService(
 // метод для реализации интерфейса из транспортного слоя - регистрация нового полььзователя
 func (as *AuthService) RegisterNewUser(
 	ctx context.Context,
-	email string, password string) (userId int, err error) {
+	email string, password string) (userId int64, err error) {
 
 	const tracelog = "auth_service.RegisterNewUser"
 

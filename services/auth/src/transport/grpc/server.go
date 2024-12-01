@@ -8,13 +8,8 @@ import (
 
 	grpcAuthV1 "github.com/AndtoSaal/simplebank/services/auth/pb/gateway-auth/v1"
 	auth_service "github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service/errors"
-
-	// "google.golang.org/appengine/log"
-
-	// "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	gRPCstatus "google.golang.org/grpc/status"
 )
 
 // структура сервера, инмплементация интерфейса из пакета, сгенеренного протоком
@@ -25,28 +20,6 @@ type AuthServerAPI struct {
 	auth     Auth
 	userInfo UserINFO
 }
-
-// // IsAdmin implements v1.AuthServer.
-// // Subtle: this method shadows the method (UnimplementedAuthServer).IsAdmin of AuthServerAPI.UnimplementedAuthServer.
-// func (s AuthServerAPI) IsAdmin(context.Context, *grpcAuthV1.IsAdminRequest) (*grpcAuthV1.IsAdminResponse, error) {
-// 	panic("unimplemented")
-// }
-
-// // Loginer implements v1.AuthServer.
-// func (s AuthServerAPI) Loginer(context.Context, *grpcAuthV1.LoginerRequest) (*grpcAuthV1.LoginerResponse, error) {
-// 	panic("unimplemented")
-// }
-
-// // Register implements v1.AuthServer.
-// func (s AuthServerAPI) Register(context.Context, *grpcAuthV1.RegisterRequest) (*grpcAuthV1.RegisterResponse, error) {
-// 	panic("unimplemented")
-// }
-
-// // mustEmbedUnimplementedAuthServer implements v1.AuthServer.
-// // Subtle: this method shadows the method (UnimplementedAuthServer).mustEmbedUnimplementedAuthServer of AuthServerAPI.UnimplementedAuthServer.
-// func (s AuthServerAPI) mustEmbedUnimplementedAuthServer() {
-// 	panic("unimplemented")
-// }
 
 func NewAuthServerAPI(auth Auth, userInfo UserINFO) *AuthServerAPI {
 	return &AuthServerAPI{
@@ -68,20 +41,20 @@ type UserINFO interface {
 
 func (s AuthServerAPI) Loginer(ctx context.Context, req *grpcAuthV1.LoginerRequest) (*grpcAuthV1.LoginerResponse, error) {
 	if req.Email == "" {
-		return nil, gRPCstatus.Error(codes.InvalidArgument, "email is required field")
+		return nil, status.Error(codes.InvalidArgument, "email is required field")
 	}
 
 	if req.Password == "" {
-		return nil, gRPCstatus.Error(codes.InvalidArgument, "password is required field")
+		return nil, status.Error(codes.InvalidArgument, "password is required field")
 	}
 
 	token, err := s.auth.LoginExistUser(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
 		//auth_service ErrInvalidCredentials - реализовать на сервисном слое
 		if errors.Is(err, auth_service.ErrInvalidCredentials) {
-			return nil, gRPCstatus.Error(codes.InvalidArgument, "invalid email or password")
+			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
 		}
-		return nil, gRPCstatus.Error(codes.Internal, "failed to login")
+		return nil, status.Error(codes.Internal, "failed to login")
 	}
 	return &grpcAuthV1.LoginerResponse{Token: token}, nil
 

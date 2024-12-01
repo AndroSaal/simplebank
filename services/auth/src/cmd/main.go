@@ -7,7 +7,8 @@ import (
 	log "github.com/AndtoSaal/simplebank/services/auth/src/pkg/logger"
 	auth_repository "github.com/AndtoSaal/simplebank/services/auth/src/repository"
 	"github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service"
-	auth_transport "github.com/AndtoSaal/simplebank/services/auth/src/transport/grpc/auth"
+	"github.com/AndtoSaal/simplebank/services/auth/src/service/usrInfo_service"
+	auth_transport "github.com/AndtoSaal/simplebank/services/auth/src/transport/grpc"
 )
 
 const (
@@ -28,8 +29,9 @@ func main() {
 	}
 
 	repositoryLevel := auth_repository.NewAuthPostgresRepo(db)
-	serviceLevel := auth_service.NewAuthService(logger, repositoryLevel, tokenTTL)
-	transportLevel := auth_transport.NewAuthServer()
+	authServiceLevel := auth_service.NewAuthService(logger, repositoryLevel, tokenTTL)
+	usrInfoServiceLevel := usrInfo_service.NewUserInfoService(logger, repositoryLevel)
+	transportLevel := auth_transport.NewAuthTransport()
 
 	//TODO: инициализировать слой репозитория
 

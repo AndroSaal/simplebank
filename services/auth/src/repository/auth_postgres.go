@@ -17,9 +17,9 @@ func NewAuthPostgresRepo(db *sqlx.DB) *AuthPostgresDB {
 }
 
 func (p *AuthPostgresDB) SaveUser(
-	ctx context.Context, email string, passwordHash []byte) (userId int, err error) {
+	ctx context.Context, email string, passwordHash []byte) (userId int64, err error) {
 
-	var id int
+	var id int64
 
 	query := fmt.Sprintf("INSERT INTO %s (name, username, password_hash) VALUES ($1, $2, $3) RETURNING id", usersTable)
 	row := p.db.QueryRow(query, email, string(passwordHash))
@@ -41,4 +41,14 @@ func (r *AuthPostgresDB) GetUser(ctx context.Context, email string) (models.User
 	err := r.db.Get(&user, query, email /*$1 в query*/)
 
 	return user, err
+}
+
+func (r *AuthPostgresDB) GetUserInfo(ctx context.Context, userId int64) (bool, error) {
+
+	var isAdmin bool
+
+	query := fmt.Sprintf("SELECT is_Admin FROM %s WHERE id=$1", usersTable)
+	err := r.db.Get(&isAdmin, query, userId /*$1 в query*/)
+
+	return isAdmin, err
 }
