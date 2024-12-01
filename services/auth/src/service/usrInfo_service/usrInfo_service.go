@@ -11,7 +11,7 @@ type UserInfoService struct {
 }
 
 type UserINFORepository interface {
-	GetUserInfo(id int64) (bool, error)
+	GetUserInfo(ctx context.Context, userId int64) (bool, error)
 }
 
 type UserInfo struct {
@@ -27,7 +27,7 @@ func NewUserInfoService(log *slog.Logger, userRepositoryHandler UserINFOReposito
 }
 
 func (u *UserInfoService) IsAdminById(ctx context.Context, userId int64) (bool, error) {
-	isAdmin, err := u.userRepositoryHandler.GetUserInfo(userId)
+	isAdmin, err := u.userRepositoryHandler.GetUserInfo(ctx, userId)
 
 	if err != nil {
 		u.log.Error("Error while getting user info", "error", err)

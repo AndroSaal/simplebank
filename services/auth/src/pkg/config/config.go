@@ -36,6 +36,7 @@ type DatabaseConfig struct {
 	SSLMode  string `yaml:"db:sslmode" env-default:"disable"`
 }
 
+
 func MustLoadConfig() (*ServerConfig, *DatabaseConfig) {
 	path := getConfigPath()
 

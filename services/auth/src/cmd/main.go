@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"time"
 
 	config "github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
@@ -19,6 +20,10 @@ func main() {
 
 	///инициализация конфигов сервера и дб
 	cfgServer, cfgDataBase := config.MustLoadConfig()
+	port, err := strconv.Atoi(cfgServer.GRPC.Port)
+	if err != nil {
+		panic("wrong port")
+	}
 
 	//инициализируем логгер с соотв переменной окружения
 	logger := log.SetUpSlogLogger(cfgServer.Env)
@@ -31,8 +36,10 @@ func main() {
 	repositoryLevel := auth_repository.NewAuthPostgresRepo(db)
 	authServiceLevel := auth_service.NewAuthService(logger, repositoryLevel, tokenTTL)
 	usrInfoServiceLevel := usrInfo_service.NewUserInfoService(logger, repositoryLevel)
-	transportLevel := auth_transport.NewAuthTransport()
+	transportLevel := auth_transport.NewAuthTransport(logger, authServiceLevel, usrInfoServiceLevel, port)
 
+	//посмотреть как завести эту историю !
+	transportLevel.gRPCServer.Runc()
 	//TODO: инициализировать слой репозитория
 
 	//TODO: инициализировать слой сервиса
