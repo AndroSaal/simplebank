@@ -11,18 +11,48 @@ import (
 
 	// "google.golang.org/appengine/log"
 
-	"google.golang.org/grpc"
+	// "google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	gRPCstatus "google.golang.org/grpc/status"
 )
 
 // структура сервера, инмплементация интерфейса из пакета, сгенеренного протоком
-type authServerAPI struct {
+type AuthServerAPI struct {
 	//техническое поле, нужно для обратной совсместимости с proto
 	grpcAuthV1.UnimplementedAuthServer
 	//интерфейс сервисного слоя
-	auth Auth
+	auth     Auth
+	userInfo UserINFO
+}
+
+// // IsAdmin implements v1.AuthServer.
+// // Subtle: this method shadows the method (UnimplementedAuthServer).IsAdmin of AuthServerAPI.UnimplementedAuthServer.
+// func (s AuthServerAPI) IsAdmin(context.Context, *grpcAuthV1.IsAdminRequest) (*grpcAuthV1.IsAdminResponse, error) {
+// 	panic("unimplemented")
+// }
+
+// // Loginer implements v1.AuthServer.
+// func (s AuthServerAPI) Loginer(context.Context, *grpcAuthV1.LoginerRequest) (*grpcAuthV1.LoginerResponse, error) {
+// 	panic("unimplemented")
+// }
+
+// // Register implements v1.AuthServer.
+// func (s AuthServerAPI) Register(context.Context, *grpcAuthV1.RegisterRequest) (*grpcAuthV1.RegisterResponse, error) {
+// 	panic("unimplemented")
+// }
+
+// // mustEmbedUnimplementedAuthServer implements v1.AuthServer.
+// // Subtle: this method shadows the method (UnimplementedAuthServer).mustEmbedUnimplementedAuthServer of AuthServerAPI.UnimplementedAuthServer.
+// func (s AuthServerAPI) mustEmbedUnimplementedAuthServer() {
+// 	panic("unimplemented")
+// }
+
+func NewAuthServerAPI(auth Auth, userInfo UserINFO) *AuthServerAPI {
+	return &AuthServerAPI{
+		auth:     auth,
+		userInfo: userInfo,
+	}
 }
 
 // какими методами должен обладать сервис Auth
@@ -31,12 +61,12 @@ type Auth interface {
 	RegisterNewUser(ctx context.Context, email string, password string) (userID int64, err error)
 }
 
-// создание нового сервера авторизации
-func NewAuthServer(gRPC *grpc.Server) {
-	grpcAuthV1.RegisterAuthServer(gRPC, &authServerAPI{})
+// структура информации о пользователе (userInfo)
+type UserINFO interface {
+	IsAdminById(ctx context.Context, userID int64) (isAdmin bool, err error)
 }
 
-func (s *authServerAPI) Loginer(ctx context.Context, req *grpcAuthV1.LoginerRequest) (*grpcAuthV1.LoginerResponse, error) {
+func (s AuthServerAPI) Loginer(ctx context.Context, req *grpcAuthV1.LoginerRequest) (*grpcAuthV1.LoginerResponse, error) {
 	if req.Email == "" {
 		return nil, gRPCstatus.Error(codes.InvalidArgument, "email is required field")
 	}
@@ -57,7 +87,7 @@ func (s *authServerAPI) Loginer(ctx context.Context, req *grpcAuthV1.LoginerRequ
 
 }
 
-func (s *authServerAPI) Register(ctx context.Context, req *grpcAuthV1.RegisterRequest) (*grpcAuthV1.RegisterResponse, error) {
+func (s AuthServerAPI) Register(ctx context.Context, req *grpcAuthV1.RegisterRequest) (*grpcAuthV1.RegisterResponse, error) {
 	if req.Email == "" {
 		return nil, status.Error(codes.InvalidArgument, "email is required field")
 	}
@@ -78,8 +108,13 @@ func (s *authServerAPI) Register(ctx context.Context, req *grpcAuthV1.RegisterRe
 
 	return &grpcAuthV1.RegisterResponse{UserId: uid}, nil
 }
-
-// func IsAdmin(context.Context, *grpcAuthV1.IsAdminRequest) (*grpcAuthV1.IsAdminResponse, error) {
-// 	// log.LevelDebug("UNimplemented")
-// 	panic("U got wat u want\n")
-// }
+func (s AuthServerAPI) IsAdminChecker(ctx context.Context, req *grpcAuthV1.IsAdminRequest) (*grpcAuthV1.IsAdminResponse, error) {
+	if req.UserId == 0 {
+		return nil, status.Error(codes.InvalidArgument, "user id is required field")
+	}
+	isAdmin, err := s.userInfo.IsAdminById(ctx, req.GetUserId())
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to check user")
+	}
+	return &grpcAuthV1.IsAdminResponse{IsAdmin: isAdmin}, nil
+}

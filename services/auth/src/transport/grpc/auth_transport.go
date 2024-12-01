@@ -4,23 +4,25 @@ import (
 	"context"
 	"log/slog"
 
-	authgrpc "grpc-service-ref/internal/grpc/auth"
-
+	grpcAuthV1 "github.com/AndtoSaal/simplebank/services/auth/pb/gateway-auth/v1"
 	"github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service"
+
+	// auth_transport "github.com/AndtoSaal/simplebank/services/auth/src/transport/grpc"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/internal/status"
+	"google.golang.org/grpc/status"
 )
 
+// обертка для type authServerAPI struct
 type AuthTransport struct {
 	gRPCServer *grpc.Server
 	log        *slog.Logger
 	port       string
 }
 
-func NewAuthTransport(log *slog.Logger, authService *auth_service.AuthService, port int) *AuthTransport {
+func NewAuthTransport(log *slog.Logger, authService *auth_service.AuthService, userInfoService *usrInfo_service.UserInfoService, port int) *AuthTransport {
 
 	loggingOpts := []logging.Option{
 		logging.WithLogOnEvents(
@@ -41,7 +43,9 @@ func NewAuthTransport(log *slog.Logger, authService *auth_service.AuthService, p
 		logging.UnaryServerInterceptor(InterceptorLogger(log), loggingOpts...),
 	))
 
-	authgrpc.RegisterAuthServiceServer(gRPCServer, authService)
+	authServerAPI := NewAuthServerAPI(authService, userInfoService)
+
+	grpcAuthV1.RegisterAuthServer(gRPCServer, authServerAPI)
 
 	return &AuthTransport{
 		gRPCServer: gRPCServer,
