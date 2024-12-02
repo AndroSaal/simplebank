@@ -2,7 +2,9 @@ package auth_transport
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"net"
 
 	grpcAuthV1 "github.com/AndtoSaal/simplebank/services/auth/pb/gateway-auth/v1"
 	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
@@ -51,6 +53,25 @@ func NewAuthTransport(
 		log:        log,
 		port:       cfg.Srv.GRPC.Port,
 	}
+}
+
+// запуск сервера на нужном порту
+func (t *AuthTransport) Run() error {
+	op := "AuthTransport.Run"
+
+	l, err := net.Listen("tcp", ":"+t.port)
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	t.log.Info("grpc server started", slog.String("addr", l.Addr().String()))
+
+	// Запускаем обработчик gRPC-сообщений
+	if err := t.gRPCServer.Serve(l); err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
 }
 
 func InterceptorLogger(l *slog.Logger) logging.Logger {
