@@ -5,8 +5,7 @@ import (
 	"log/slog"
 
 	grpcAuthV1 "github.com/AndtoSaal/simplebank/services/auth/pb/gateway-auth/v1"
-	"github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service"
-	"github.com/AndtoSaal/simplebank/services/auth/src/service/usrInfo_service"
+	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
@@ -22,8 +21,7 @@ type AuthTransport struct {
 }
 
 func NewAuthTransport(
-	log *slog.Logger, authService *auth_service.AuthService,
-	userInfoService *usrInfo_service.UserInfoService, port int) *AuthTransport {
+	log *slog.Logger, cfg config.ServiceConfig) *AuthTransport {
 
 	loggingOpts := []logging.Option{
 		logging.WithLogOnEvents(
@@ -44,14 +42,14 @@ func NewAuthTransport(
 		logging.UnaryServerInterceptor(InterceptorLogger(log), loggingOpts...),
 	))
 
-	authServerAPI := NewAuthServerAPI(authService, userInfoService)
+	authServerAPI := NewAuthServerAPI(log, cfg)
 
 	grpcAuthV1.RegisterAuthServer(gRPCServer, authServerAPI)
 
 	return &AuthTransport{
 		gRPCServer: gRPCServer,
 		log:        log,
-		port:       string(port),
+		port:       cfg.Srv.GRPC.Port,
 	}
 }
 

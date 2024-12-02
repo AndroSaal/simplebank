@@ -5,9 +5,13 @@ package auth_transport
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	grpcAuthV1 "github.com/AndtoSaal/simplebank/services/auth/pb/gateway-auth/v1"
-	auth_service "github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service/errors"
+	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
+	"github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service"
+	authServiceError "github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service/errors"
+	"github.com/AndtoSaal/simplebank/services/auth/src/service/usrInfo_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -21,10 +25,10 @@ type AuthServerAPI struct {
 	userInfo UserINFO
 }
 
-func NewAuthServerAPI(auth Auth, userInfo UserINFO) *AuthServerAPI {
+func NewAuthServerAPI(log *slog.Logger, serviceConfig config.ServiceConfig) *AuthServerAPI {
 	return &AuthServerAPI{
-		auth:     auth,
-		userInfo: userInfo,
+		auth:     auth_service.NewAuthService(log, serviceConfig),
+		userInfo: usrInfo_service.NewUserInfoService(log, serviceConfig),
 	}
 }
 
@@ -51,7 +55,7 @@ func (s AuthServerAPI) Loginer(ctx context.Context, req *grpcAuthV1.LoginerReque
 	token, err := s.auth.LoginExistUser(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
 		//auth_service ErrInvalidCredentials - реализовать на сервисном слое
-		if errors.Is(err, auth_service.ErrInvalidCredentials) {
+		if errors.Is(err, authServiceError.ErrInvalidCredentials) {
 			return nil, status.Error(codes.InvalidArgument, "invalid email or password")
 		}
 		return nil, status.Error(codes.Internal, "failed to login")
@@ -72,7 +76,7 @@ func (s AuthServerAPI) Register(ctx context.Context, req *grpcAuthV1.RegisterReq
 	uid, err := s.auth.RegisterNewUser(ctx, req.GetEmail(), req.GetPassword())
 	if err != nil {
 		//repository.ErrUserExists реализовать на сервисном слое
-		if errors.Is(err, auth_service.ErrUserExists) {
+		if errors.Is(err, authServiceError.ErrUserExists) {
 			return nil, status.Error(codes.AlreadyExists, "user already exists")
 		}
 
