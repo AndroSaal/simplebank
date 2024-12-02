@@ -2,9 +2,10 @@ package auth_repository
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/AndtoSaal/simplebank/services/auth/src/entities/models"
-	"github.com/jmoiron/sqlx"
+	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
 )
 
 // интерфейс, которым определяющий тип, которым должна обладать конкретная бд
@@ -25,9 +26,10 @@ type AuthUserRepo struct {
 }
 
 // конструктор типа AuthUserRepo
-func NewAuthRepository(db *sqlx.DB) *AuthUserRepo {
+func NewAuthRepository(cfgDataBase *config.DatabaseConfig, logger *slog.Logger) *AuthUserRepo {
+	new := NewAuthPostgresRepo(cfgDataBase, logger)
 	return &AuthUserRepo{
-		repoAuth: NewAuthPostgresRepo(db),
-		repoInf:  NewAuthPostgresRepo(db),
+		repoAuth: new,
+		repoInf:  new,
 	}
 }

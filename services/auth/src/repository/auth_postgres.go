@@ -3,8 +3,10 @@ package auth_repository
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/AndtoSaal/simplebank/services/auth/src/entities/models"
+	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -12,7 +14,11 @@ type AuthPostgresDB struct {
 	db *sqlx.DB
 }
 
-func NewAuthPostgresRepo(db *sqlx.DB) *AuthPostgresDB {
+func NewAuthPostgresRepo(cfgDataBase *config.DatabaseConfig, logger *slog.Logger) *AuthPostgresDB {
+	db, err := NewPostgresDB(cfgDataBase)
+	if err != nil {
+		logger.Error("Cannot connect to databse", (err).Error())
+	}
 	return &AuthPostgresDB{db: db}
 }
 
