@@ -55,6 +55,13 @@ func NewAuthTransport(
 	}
 }
 
+// нет смысла идти дальше по коду если возникла ошибка при запуске
+func (t *AuthTransport) MustRun() {
+	if err := t.Run(); err != nil {
+		panic(err)
+	}
+}
+
 // запуск сервера на нужном порту
 func (t *AuthTransport) Run() error {
 	op := "AuthTransport.Run"

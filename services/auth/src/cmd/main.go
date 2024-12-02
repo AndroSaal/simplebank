@@ -1,15 +1,9 @@
 package main
 
 import (
-	"time"
-
 	config "github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
 	log "github.com/AndtoSaal/simplebank/services/auth/src/pkg/logger"
 	auth_transport "github.com/AndtoSaal/simplebank/services/auth/src/transport/grpc"
-)
-
-const (
-	tokenTTL time.Duration = time.Hour * 1
 )
 
 func main() {
@@ -23,8 +17,8 @@ func main() {
 	//инициализируем все слои сервиса
 	transportLevel := auth_transport.NewAuthTransport(logger, *cfgService)
 
-	//посмотреть как завести эту историю !
-	transportLevel.gRPCServer.Run()
+	transportLevel.Run()
+	//посмотреть как завести эту историю !]
 	//TODO: инициализировать слой репозитория
 
 	//TODO: инициализировать слой сервиса
