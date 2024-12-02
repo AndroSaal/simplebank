@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/AndtoSaal/simplebank/services/auth/src/entities/models"
+	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
 	jwtAuth "github.com/AndtoSaal/simplebank/services/auth/src/pkg/jwt"
 	log "github.com/AndtoSaal/simplebank/services/auth/src/pkg/logger"
 	auth_repository "github.com/AndtoSaal/simplebank/services/auth/src/repository"
@@ -41,13 +42,12 @@ type AuthService struct {
 // конструктор AuthService
 func NewAuthService(
 	log *slog.Logger,
-	userRepositoryHandler UserRepository,
-	tokenTTL time.Duration,
+	serviceConfig config.ServiceConfig,
 ) *AuthService {
 	return &AuthService{
-		userRepositoryHandler: userRepositoryHandler,
+		userRepositoryHandler: auth_repository.NewAuthPostgresRepo(&serviceConfig.DB, log),
 		log:                   log,
-		tokenTTL:              tokenTTL, // Время жизни возвращаемых токенов
+		tokenTTL:              serviceConfig.Login.TokenTTL, // Время жизни возвращаемых токенов
 	}
 }
 

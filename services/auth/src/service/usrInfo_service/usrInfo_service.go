@@ -3,6 +3,9 @@ package usrInfo_service
 import (
 	"context"
 	"log/slog"
+
+	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
+	auth_repository "github.com/AndtoSaal/simplebank/services/auth/src/repository"
 )
 
 type UserInfoService struct {
@@ -19,10 +22,13 @@ type UserInfo struct {
 	IsAdmin bool
 }
 
-func NewUserInfoService(log *slog.Logger, userRepositoryHandler UserINFORepository) *UserInfoService {
+func NewUserInfoService(
+	log *slog.Logger,
+	serviceConfig config.ServiceConfig,
+) *UserInfoService {
 	return &UserInfoService{
 		log:                   log,
-		userRepositoryHandler: userRepositoryHandler,
+		userRepositoryHandler: auth_repository.NewAuthPostgresRepo(&serviceConfig.DB, log),
 	}
 }
 
