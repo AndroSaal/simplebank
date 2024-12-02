@@ -1,14 +1,10 @@
 package main
 
 import (
-	"strconv"
 	"time"
 
 	config "github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
 	log "github.com/AndtoSaal/simplebank/services/auth/src/pkg/logger"
-	auth_repository "github.com/AndtoSaal/simplebank/services/auth/src/repository"
-	"github.com/AndtoSaal/simplebank/services/auth/src/service/auth_service"
-	"github.com/AndtoSaal/simplebank/services/auth/src/service/usrInfo_service"
 	auth_transport "github.com/AndtoSaal/simplebank/services/auth/src/transport/grpc"
 )
 
@@ -19,27 +15,16 @@ const (
 func main() {
 
 	///инициализация конфигов сервера и дб
-	cfgServer, cfgDataBase := config.MustLoadConfig()
-	port, err := strconv.Atoi(cfgServer.GRPC.Port)
-	if err != nil {
-		panic("wrong port")
-	}
+	cfgService := config.MustLoadConfig()
 
 	//инициализируем логгер с соотв переменной окружения
-	logger := log.SetUpSlogLogger(cfgServer.Env)
+	logger := log.SetUpSlogLogger(cfgService.Srv.Env)
 
-	db, err := auth_repository.NewPostgresDB(cfgDataBase)
-	if err != nil {
-		logger.Error("Cannot connect to databse", (err).Error())
-	}
-
-	repositoryLevel := auth_repository.NewAuthPostgresRepo(db)
-	authServiceLevel := auth_service.NewAuthService(logger, repositoryLevel, tokenTTL)
-	usrInfoServiceLevel := usrInfo_service.NewUserInfoService(logger, repositoryLevel)
-	transportLevel := auth_transport.NewAuthTransport(logger, authServiceLevel, usrInfoServiceLevel, port)
+	//инициализируем все слои сервиса
+	transportLevel := auth_transport.NewAuthTransport(logger, *cfgService)
 
 	//посмотреть как завести эту историю !
-	transportLevel.gRPCServer.Runc()
+	transportLevel.gRPCServer.Run()
 	//TODO: инициализировать слой репозитория
 
 	//TODO: инициализировать слой сервиса

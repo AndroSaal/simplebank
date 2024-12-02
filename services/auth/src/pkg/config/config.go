@@ -12,6 +12,12 @@ import (
 	// "google.golang.org/grpc"
 )
 
+type ServiceConfig struct {
+	DB    DatabaseConfig
+	Srv   ServerConfig
+	Login LoginCongif
+}
+
 // конфигурация сервера
 type ServerConfig struct {
 	Env  string      `yaml:"env" env-default:"local"`
@@ -25,6 +31,10 @@ type GRPCConfing struct {
 	Timeout time.Duration `yaml:"grpc:timeout"`
 }
 
+type LoginCongif struct {
+	TokenTTL time.Duration `yaml:"token_ttl" env-default:"15h"`
+}
+
 // конфигурация базы
 type DatabaseConfig struct {
 	Env      string `yaml:"db:env"`
@@ -36,8 +46,7 @@ type DatabaseConfig struct {
 	SSLMode  string `yaml:"db:sslmode" env-default:"disable"`
 }
 
-
-func MustLoadConfig() (*ServerConfig, *DatabaseConfig) {
+func MustLoadConfig() *ServiceConfig {
 	path := getConfigPath()
 
 	if path == "" {
@@ -49,10 +58,11 @@ func MustLoadConfig() (*ServerConfig, *DatabaseConfig) {
 		panic("config file does not exist: " + path)
 	}
 
-	serverConfig := MustLoadServerConfig(path)
-	dbConfig := MustLoadDataBaseConfig(path)
-
-	return serverConfig, dbConfig
+	return &ServiceConfig{
+		DB:    *MustLoadDataBaseConfig(path),
+		Srv:   *MustLoadServerConfig(path),
+		Login: *MustLoadDLoginConfig(path),
+	}
 
 }
 
@@ -75,6 +85,16 @@ func MustLoadDataBaseConfig(path string) *DatabaseConfig {
 
 	//запись из файла по пути path в сущность cfg,
 	//если возникает ошибка - паникуем
+	if err := cleanenv.ReadConfig(path, &cfg); err != nil {
+		panic("config path is empty: " + err.Error())
+	}
+
+	return &cfg
+}
+
+func MustLoadDLoginConfig(path string) *LoginCongif {
+	var cfg LoginCongif
+
 	if err := cleanenv.ReadConfig(path, &cfg); err != nil {
 		panic("config path is empty: " + err.Error())
 	}
