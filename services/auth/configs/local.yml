@@ -1,6 +1,6 @@
 #конфигурация сервиса
 
-env: "local" #or dev or prod
+#env: "local" #or dev or prod
 
 login:
   token_ttl: "1h"
@@ -9,6 +9,7 @@ grpc:
   port: "8080"
   host: "localhost"
   timaout: "1h"
+  env: "local"
 
 db:
   username: "postgres"
