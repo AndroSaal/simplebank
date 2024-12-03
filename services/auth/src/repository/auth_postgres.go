@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"sync"
 
 	"github.com/AndtoSaal/simplebank/services/auth/src/entities/models"
 	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
@@ -22,8 +23,9 @@ func NewAuthPostgresRepo(cfgDataBase config.DatabaseConfig, logger *slog.Logger)
 	return &AuthPostgresDB{db: db}
 }
 
-func (p *AuthPostgresDB) Stop() error {
+func (p *AuthPostgresDB) Stop(wg *sync.WaitGroup) error {
 	err := p.db.Close()
+	wg.Done()
 	return err
 }
 

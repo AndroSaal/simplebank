@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"sync"
 
 	grpcAuthV1 "github.com/AndtoSaal/simplebank/services/auth/pb/gateway-auth/v1"
 	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
@@ -85,11 +86,13 @@ func (t *AuthTransport) Run() error {
 
 func (t *AuthTransport) Stop() {
 	t.log.Info("stoping grpc server", slog.String("addr", t.port))
+	//отключаемся от базы
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() { t.authServerAPI.auth.Stop(wg) }()
 
 	//встроенным механизмом останавливаем сервер
 	t.gRPCServer.GracefulStop()
-
-	t.authServerAPI.auth.Stop()
 
 }
 

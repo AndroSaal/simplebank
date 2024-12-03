@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"sync"
 
 	grpcAuthV1 "github.com/AndtoSaal/simplebank/services/auth/pb/gateway-auth/v1"
 	"github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
@@ -36,7 +37,7 @@ func NewAuthServerAPI(log *slog.Logger, serviceConfig config.ServiceConfig) *Aut
 type Auth interface {
 	LoginExistUser(ctx context.Context, email string, password string) (token string, err error)
 	RegisterNewUser(ctx context.Context, email string, password string) (userID int64, err error)
-	Stop() error
+	Stop(*sync.WaitGroup) error
 }
 
 // структура информации о пользователе (userInfo)

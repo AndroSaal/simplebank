@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"sync"
 	"time"
 
 	"github.com/AndtoSaal/simplebank/services/auth/src/entities/models"
@@ -25,7 +26,7 @@ type UserGetter interface {
 }
 
 type StopperConnecion interface {
-	Stop() error
+	Stop(*sync.WaitGroup) error
 }
 
 // интерфейс для хранилища (repository слой)
@@ -134,7 +135,7 @@ func (as *AuthService) LoginExistUser(ctx context.Context, email string, passwor
 
 }
 
-func (as *AuthService) Stop() error {
-	err := as.userRepositoryHandler.Stop()
+func (as *AuthService) Stop(wg *sync.WaitGroup) error {
+	err := as.userRepositoryHandler.Stop(wg)
 	return err
 }
