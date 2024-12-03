@@ -17,9 +17,15 @@ type AuthPostgresDB struct {
 func NewAuthPostgresRepo(cfgDataBase *config.DatabaseConfig, logger *slog.Logger) *AuthPostgresDB {
 	db, err := NewPostgresDB(cfgDataBase)
 	if err != nil {
-		logger.Error("Cannot connect to databse", (err).Error())
+		logger.Error("Cannot connect to databse :")
+		logger.Error((err).Error())
 	}
 	return &AuthPostgresDB{db: db}
+}
+
+func (p *AuthPostgresDB) Stop() error {
+	err := p.db.Close()
+	return err
 }
 
 func (p *AuthPostgresDB) SaveUser(

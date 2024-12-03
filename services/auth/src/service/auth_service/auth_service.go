@@ -24,10 +24,15 @@ type UserGetter interface {
 	GetUser(ctx context.Context, email string) (models.User, error)
 }
 
+type StopperConnecion interface {
+	Stop() error
+}
+
 // интерфейс для хранилища (repository слой)
 type UserRepository interface {
 	UserGetter
 	UserAdder
+	StopperConnecion
 }
 
 // реализация интерфейса Auth из services/auth/src/transport/grpc/auth/server.go
@@ -127,4 +132,9 @@ func (as *AuthService) LoginExistUser(ctx context.Context, email string, passwor
 
 	return token, nil
 
+}
+
+func (as *AuthService) Stop() error {
+	err := as.userRepositoryHandler.Stop()
+	return err
 }

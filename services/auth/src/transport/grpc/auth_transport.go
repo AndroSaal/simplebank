@@ -17,9 +17,10 @@ import (
 
 // обертка для type authServerAPI struct
 type AuthTransport struct {
-	gRPCServer *grpc.Server
-	log        *slog.Logger
-	port       string
+	gRPCServer    *grpc.Server
+	log           *slog.Logger
+	authServerAPI *AuthServerAPI
+	port          string
 }
 
 func NewAuthTransport(
@@ -49,9 +50,10 @@ func NewAuthTransport(
 	grpcAuthV1.RegisterAuthServer(gRPCServer, authServerAPI)
 
 	return &AuthTransport{
-		gRPCServer: gRPCServer,
-		log:        log,
-		port:       cfg.Srv.GRPC.Port,
+		gRPCServer:    gRPCServer,
+		log:           log,
+		port:          cfg.Srv.GRPC.Port,
+		authServerAPI: authServerAPI,
 	}
 }
 
@@ -79,6 +81,16 @@ func (t *AuthTransport) Run() error {
 	}
 
 	return nil
+}
+
+func (t *AuthTransport) Stop() {
+	t.log.Info("stoping grpc server", slog.String("addr", t.port))
+
+	//встроенным механизмом останавливаем сервер
+	t.gRPCServer.GracefulStop()
+
+	t.authServerAPI.auth.Stop()
+
 }
 
 func InterceptorLogger(l *slog.Logger) logging.Logger {

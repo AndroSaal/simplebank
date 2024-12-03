@@ -36,6 +36,7 @@ func NewAuthServerAPI(log *slog.Logger, serviceConfig config.ServiceConfig) *Aut
 type Auth interface {
 	LoginExistUser(ctx context.Context, email string, password string) (token string, err error)
 	RegisterNewUser(ctx context.Context, email string, password string) (userID int64, err error)
+	Stop() error
 }
 
 // структура информации о пользователе (userInfo)
