@@ -26,7 +26,7 @@ type AuthUserRepo struct {
 }
 
 // конструктор типа AuthUserRepo
-func NewAuthRepository(cfgDataBase *config.DatabaseConfig, logger *slog.Logger) *AuthUserRepo {
+func NewAuthRepository(cfgDataBase config.DatabaseConfig, logger *slog.Logger) *AuthUserRepo {
 	new := NewAuthPostgresRepo(cfgDataBase, logger)
 	return &AuthUserRepo{
 		repoAuth: new,

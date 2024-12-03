@@ -50,7 +50,7 @@ func NewAuthService(
 	serviceConfig config.ServiceConfig,
 ) *AuthService {
 	return &AuthService{
-		userRepositoryHandler: auth_repository.NewAuthPostgresRepo(&serviceConfig.DB, log),
+		userRepositoryHandler: auth_repository.NewAuthPostgresRepo(serviceConfig.DB, log),
 		log:                   log,
 		tokenTTL:              serviceConfig.Login.TokenTTL, // Время жизни возвращаемых токенов
 	}

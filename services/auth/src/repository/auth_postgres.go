@@ -14,11 +14,10 @@ type AuthPostgresDB struct {
 	db *sqlx.DB
 }
 
-func NewAuthPostgresRepo(cfgDataBase *config.DatabaseConfig, logger *slog.Logger) *AuthPostgresDB {
+func NewAuthPostgresRepo(cfgDataBase config.DatabaseConfig, logger *slog.Logger) *AuthPostgresDB {
 	db, err := NewPostgresDB(cfgDataBase)
 	if err != nil {
-		logger.Error("Cannot connect to databse :")
-		logger.Error((err).Error())
+		logger.Error(fmt.Sprintf("Cannot connect to databse : %s ", (err).Error()))
 	}
 	return &AuthPostgresDB{db: db}
 }

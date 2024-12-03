@@ -28,7 +28,7 @@ func NewUserInfoService(
 ) *UserInfoService {
 	return &UserInfoService{
 		log:                   log,
-		userRepositoryHandler: auth_repository.NewAuthPostgresRepo(&serviceConfig.DB, log),
+		userRepositoryHandler: auth_repository.NewAuthPostgresRepo(serviceConfig.DB, log),
 	}
 }
 
