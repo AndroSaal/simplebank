@@ -1,6 +1,10 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
 	config "github.com/AndtoSaal/simplebank/services/auth/src/pkg/config"
 	log "github.com/AndtoSaal/simplebank/services/auth/src/pkg/logger"
 	auth_transport "github.com/AndtoSaal/simplebank/services/auth/src/transport/grpc"
@@ -17,19 +21,20 @@ func main() {
 	//инициализируем все слои сервиса
 	transportLevel := auth_transport.NewAuthTransport(logger, *cfgService)
 
-	transportLevel.Run()
-	//посмотреть как завести эту историю !]
-	//TODO: инициализировать слой репозитория
+	//запуск всего сервиса, при ошибки - паника
+	go func() {
+		transportLevel.MustRun()
+	}()
 
-	//TODO: инициализировать слой сервиса
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
-	//TODO: инициализировать слой хэндлеров
+	// Waiting for SIGINT (pkill -2) or SIGTERM
+	<-stop
 
-	//TODO: инициализация сервера
+	//graceful shutdown, закрытие коннекта к базе, остановка сервра
+	transportLevel.Stop()
 
-	//TODO: Запуск сервера
-
-	//TODO: обработка сигналов
 
 	//TODO: остановка сервиса (graicfull shoutdown)
 
