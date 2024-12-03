@@ -1,7 +1,9 @@
 #конфигурация сервиса
 
 env: "local" #or dev or prod
-token_ttl: "1h"
+
+login:
+  token_ttl: "1h"
 
 grpc:
   port: "8080"

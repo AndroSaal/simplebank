@@ -7,14 +7,15 @@ DB_PORT = 5432
 DB_NAME = postgres
 
 #CONFIG
-CONFIGPATH=./configs/local.yml
+CONFIGPATH=./configs
+CONFIGNAME=local
 MIGRATIONSDIR=migrations
 
 build :
 	go build -o ./.bin/auth ./src/cmd/main.go
 
 run : build
-	./.bin/auth  --config=$(CONFIGPATH)
+	./.bin/auth  --config_path=$(CONFIGPATH) --config_name=$(CONFIGNAME)
 # 	 go run src/cmd/main.go --config=$(CONFIGPATH)
 clean :
 	rm -rf ./.bin
