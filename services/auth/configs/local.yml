@@ -7,14 +7,14 @@ login:
 
 grpc:
   port: "8080"
-  host: "localhost"
+  host: "host.docker.internal"
   timaout: "1h"
   env: "local"
 
 db:
   username: "postgres"
   password: "qwerty"
-  host: "localhost"
-  port: "5436"
+  host: "host.docker.internal"
+  port: "5432"
   dbname: "postgres"
   sslmode: "disable"

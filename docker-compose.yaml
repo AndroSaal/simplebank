@@ -7,12 +7,13 @@ services:
       POSTGRES_DB: "postgres"
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "qwerty"
-    # env_file: -- сделать обязательно
+      PGSSLMODE: "disable"
+    # env_file: -- сделать когда-нибудь
     #   - ./services/gateway/.env
     volumes:
       - ./services/auth/migrations/000001_init.up.sql:/docker-entrypoint-initdb.d/initdb.sql
     ports:
-      - "5436:5432"
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 10s
@@ -35,3 +36,4 @@ services:
       - ./services/auth:/usr/src/app
     depends_on:
       - postgres_auth
+
