@@ -1,4 +1,4 @@
-CREATE TABLE migration_tests (
+CREATE TABLE IF NOT EXISTS migration_tests (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
     passsword_hash VARCHAR(255) NOT NULL
